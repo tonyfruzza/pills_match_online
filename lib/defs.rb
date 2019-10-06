@@ -21,10 +21,16 @@ FCS_PILL_LEFT = 3
 FCS_PILL_TOP = 4
 FCS_PILL_BOTTOM = 5
 FCS_PILL_HALF = 6
+FCS_PILL_VIRUS_ONE = 7
+FCS_PILL_VIRUS_TWO = 8
+FCS_PILL_VIRUS_THREE = 9
 
 PILL_IMG_RIGHT = 'assets/h_pill_right.png'
 PILL_IMG_LEFT = 'assets/h_pill_left.png'
 PILL_IMG_HALF = 'assets/pill_half.png'
+VIRUS_IMG_ONE = 'assets/virus_one.png'
+VIRUS_IMG_TWO = 'assets/virus_two.png'
+VIRUS_IMG_THREE = 'assets/virus_three.png'
 
 PILL_IMG_SET = [nil, nil, PILL_IMG_RIGHT, PILL_IMG_LEFT, nil, nil, PILL_IMG_HALF]
 
@@ -43,12 +49,17 @@ CYAN = '#5dfffb'
 YELLOW = '#fcff1e'
 L_BLUE = '#9587f7'
 PILL_COLORS = [CYAN, YELLOW, L_BLUE]
+VIRUS_TYPE = {
+  FCS_PILL_VIRUS_ONE: {color: CYAN, img: VIRUS_IMG_ONE},
+  FCS_PILL_VIRUS_TWO: {color: YELLOW, img: VIRUS_IMG_TWO},
+  FCS_PILL_VIRUS_THREE: {color: L_BLUE, img: VIRUS_IMG_THREE}
+}
 
 PILL_ORIENTATION_FLAT = 0
 PILL_ORIENTATION_TALL = 1
 
 # AWS
-ENABLE_MULTI_PLAY = true
+ENABLE_MULTI_PLAY = false
 AWS_REGION = 'us-west-2'
 SLEEP_FREQ_FOR_PRODUCER = 0.5
 SLEEP_FREQ_FOR_CONSUMER = 0.5

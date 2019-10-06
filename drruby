@@ -6,17 +6,19 @@ require './lib/producer.rb'
 require './lib/consumer.rb'
 require './lib/pill.rb'
 require './lib/connect_four.rb'
+require './lib/viruses.rb'
 
 set title: 'DrRuby'
 $paused = false
 
 @gf = GameField.new
 @cf = ConnectFour.new(@gf)
-@producer = Producer.new
 if ENABLE_MULTI_PLAY
+  @producer = Producer.new
   @consumer = Consumer.new
   @consumer.handle_consuming
 end
+@viruses = Viruses.new(@gf)
 @pill = Pill.new(@gf)
 @key_repeats = 0
 @key_rotate_repeats = 0
@@ -100,8 +102,8 @@ update do
       @key_repeats = 0
     end
   end
-  # @producer.update_location(@pill.left.x, @pill.left.y) if ENABLE_MULTI_PLAY && (tick % TICKS_TO_SEND_SCREEN_STATE == 0)
-  @producer.send_game_field_state(@gf.game_field_map) if tick % TICKS_TO_SEND_SCREEN_STATE == 0
+
+  @producer.send_game_field_state(@gf.game_field_map) if tick % TICKS_TO_SEND_SCREEN_STATE == 0 && ENABLE_MULTI_PLAY
   tick += 1
 end
 

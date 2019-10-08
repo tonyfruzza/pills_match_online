@@ -15,16 +15,17 @@ class Consumer
   end
 
   def poll_for_game_data
+    puts "Consumer engine initialized polling #{SQS_QUEUE_URL}"
     poller = Aws::SQS::QueuePoller.new(SQS_QUEUE_URL)
     poller.poll do |msg|
-      puts @ghost_pos = JSON.parse(
+      ghost_data = JSON.parse(
         Zlib::Inflate.inflate(
           Base64.decode64(
             JSON.parse(msg.to_h[:body]).to_h['Message']
           )
         )
       )
-      update_ghost
+      update_ghost(ghost_data)
       sleep SLEEP_FREQ_FOR_CONSUMER
     end
   end
@@ -33,14 +34,14 @@ class Consumer
     Thread.new{poll_for_game_data}
   end
 
-  def update_ghost
-    puts "Got data working creating a pill"
-    @ghost_pos.each do |cell|
+  def update_ghost(ghost_data)
+    ghost_data.each do |cell|
+      # puts "Creating image based on #{PILL_IMG_SET[cell['s']]}"
       new_pill = Image.new PILL_IMG_SET[cell['s']]
       new_pill.height = new_pill.width = CHAR_SIZE
       new_pill.x = (CHAR_SIZE * M_BOTTLE_X_OFFSET) + (cell['x'] * CHAR_SIZE)
       new_pill.y = (cell['y'] * CHAR_SIZE) - (CHAR_SIZE * M_BOTTLE_Y_OFFSET)
-      new_pill.color = cell['c']
+      new_pill.color = PILL_COLORS[cell['c']] == nil ? 'red' : PILL_COLORS[cell['c']]
     end
   end
 end

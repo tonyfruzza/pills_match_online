@@ -1,44 +1,3 @@
-module Ruby2D
-  class Color
-    def initialize(c)
-      @c = c
-      if !self.class.is_valid? c
-        raise Error, "`#{c}` is not a valid color"
-      else
-        case c
-        when String
-          if c == 'random'
-            @r, @g, @b, @a = rand, rand, rand, 1.0
-          elsif self.class.is_hex?(c)
-            @r, @g, @b, @a = hex_to_f(c)
-          else
-            @r, @g, @b, @a = hex_to_f(@@colors[c])
-          end
-        when Array
-          @r, @g, @b, @a = [c[0], c[1], c[2], c[3]]
-        when Color
-          @r, @g, @b, @a = [c.r, c.g, c.b, c.a]
-        end
-      end
-    end
-
-    def to_s
-      @c
-    end
-
-    def ==(other_color)
-      return self.r == other_color.r && self.g == other_color.g && self.b == other_color.b
-    end
-
-    def copy_colors(other_color)
-      self.r = other_color.r
-      self.g = other_color.g
-      self.b = other_color.b
-      self.a = other_color.a
-    end
-  end
-end
-
 class ConnectFour
   def initialize(game_field)
     @gf = game_field
@@ -152,7 +111,7 @@ class ConnectFour
             # to a half pill?
             if @gfm[x+1][y][:to_clear] != true && @gfm[x+1][y][:state] == FCS_PILL_RIGHT
               new_image = Image.new PILL_IMG_HALF
-              new_image.color.copy_colors(@gfm[x+1][y][:img].color)
+              new_image.color = @gfm[x+1][y][:img].color.to_s
               new_image.x = @gfm[x+1][y][:x]
               new_image.y = @gfm[x+1][y][:y]
               new_image.height = new_image.width = CHAR_SIZE
@@ -169,7 +128,7 @@ class ConnectFour
             if @gfm[x-1][y][:to_clear] != true && @gfm[x-1][y][:state] == FCS_PILL_LEFT
               new_image = Image.new PILL_IMG_HALF
               begin
-                new_image.color.copy_colors(@gfm[x-1][y][:img].color)
+                new_image.color = @gfm[x-1][y][:img].color.to_s
                 new_image.x = @gfm[x-1][y][:x]
                 new_image.y = @gfm[x-1][y][:y]
                 new_image.height = new_image.width = CHAR_SIZE
@@ -189,7 +148,7 @@ class ConnectFour
           when FCS_PILL_TOP
             if @gfm[x][y+1][:to_clear] != true && @gfm[x][y+1][:state] == FCS_PILL_BOTTOM
               new_image = Image.new PILL_IMG_HALF
-              new_image.color.copy_colors(@gfm[x][y+1][:img].color)
+              new_image.color = @gfm[x][y+1][:img].color.to_s
               new_image.x = @gfm[x][y+1][:x]
               new_image.y = @gfm[x][y+1][:y]
               new_image.height = new_image.width = CHAR_SIZE
@@ -206,7 +165,7 @@ class ConnectFour
             if @gfm[x][y-1][:to_clear] != true && @gfm[x][y-1][:state] == FCS_PILL_TOP
               new_image = Image.new PILL_IMG_HALF
               begin
-                new_image.color.copy_colors(@gfm[x][y-1][:img].color)
+                new_image.color = @gfm[x][y-1][:img].color.to_s
               rescue
               end
               new_image.x = @gfm[x][y-1][:x]

@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'ruby2d'
 require './lib/defs.rb'
+require './lib/color.rb'
 require './lib/game_field.rb'
 require './lib/producer.rb'
 require './lib/consumer.rb'
@@ -13,9 +14,8 @@ $paused = false
 
 @gf = GameField.new
 @cf = ConnectFour.new(@gf)
-@producer = Producer.new if ENABLE_MULTI_PLAY_PRODUCER
+@producer = Producer.new(@gf) if ENABLE_MULTI_PLAY_PRODUCER
 @consumer = Consumer.new if ENABLE_MULTI_PLAY_CONSUMER
-@consumer.handle_consuming if ENABLE_MULTI_PLAY_CONSUMER
 @viruses = Viruses.new(@gf)
 @pill = Pill.new(@gf)
 @key_repeats = 0
@@ -75,20 +75,9 @@ on :key_down do |k|
   else
   end
 end
-#
-# @text = Text.new(
-#   0,
-#   x: get(:width) / 2 - 100,
-#   y: 5,
-#   font: 'assets/Arial.ttf',
-#   color: 'gray',
-#   size: 40
-# )
-
 
 tick = 0
 update do
-  # set background: 'random'
   next if $paused
   if tick % DROP_TICKS == 0
     # Hit bottom
@@ -98,10 +87,11 @@ update do
       # Reset
       @pill = Pill.new(@gf)
       @key_down_repeats = @key_repeats = 0
+      @producer.send_game_field_state && ENABLE_MULTI_PLAY_PRODUCER
+      @consumer.read_from_queue
     end
   end
 
-  @producer.send_game_field_state(@gf.game_field_map) if tick % TICKS_TO_SEND_SCREEN_STATE == 0 && ENABLE_MULTI_PLAY_PRODUCER
   tick += 1
 end
 

@@ -71,8 +71,8 @@ class Pill
           return
         end
       end
-      color_temp_1 = @pill_left.color
-      color_temp_2 = @pill_right.color
+      color_temp_1 = @pill_left.color.to_s
+      color_temp_2 = @pill_right.color.to_s
 
       @pill_left.rotate = 270
       @pill_right.rotate = 270

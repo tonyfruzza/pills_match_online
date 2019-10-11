@@ -17,7 +17,8 @@ class GameField
           y: (BOTTLE_Y_OFFSET + row) * CHAR_SIZE,
           state: FCS_EMPTY,
           to_clear: nil,
-          img: nil
+          img: nil,
+          r: nil
         }
       end
     end

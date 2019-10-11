@@ -3,11 +3,11 @@ require 'ruby2d'
 require './lib/defs.rb'
 require './lib/color.rb'
 require './lib/game_field.rb'
-require './lib/producer.rb'
-require './lib/consumer.rb'
 require './lib/pill.rb'
 require './lib/connect_four.rb'
 require './lib/viruses.rb'
+require './lib/net/producer.rb'
+require './lib/net/consumer.rb'
 
 set title: 'DrRuby'
 $paused = false
@@ -18,81 +18,8 @@ $paused = false
 @consumer = Consumer.new if ENABLE_MULTI_PLAY_CONSUMER
 @viruses = Viruses.new(@gf)
 @pill = Pill.new(@gf)
-@key_repeats = 0
-@key_rotate_repeats = 0
-@key_down_repeats = 0
-@in_drop_state = false
-@in_drop_state_count = 0
 
-on :key_up do |k|
-  key = k['key']
-  case key
-  when 'left'
-    @key_repeats = 0
-  when 'right'
-    @key_repeats = 0
-  when 'down'
-    @key_down_repeats = 0
-  when 'up'
-    @key_rotate_repeats = 0
-  end
-end
-
-on :key_held do |k|
-  key = k['key']
-
-  case key
-  when 'left'
-    @pill.move_left if @key_repeats == 0
-    @key_repeats += 1
-    @key_repeats = 0 if @key_repeats == KEY_TIME_REPEAT
-  when 'right'
-    @pill.move_right if @key_repeats == 0
-    @key_repeats += 1
-    @key_repeats = 0 if @key_repeats == KEY_TIME_REPEAT
-  when 'up'
-    @pill.rotate if @key_rotate_repeats == 0
-    @key_rotate_repeats += 1
-    @key_rotate_repeats = 0 if @key_rotate_repeats == KEY_TIME_REPEAT
-  when 'down'
-    @pill.move_down if @key_down_repeats == 0
-    @key_down_repeats += 1
-    @key_down_repeats = 0 if @key_down_repeats == KEY_TIME_REPEAT_FOR_DOWN
-  end
-end
-
-on :key_down do |k|
-  key = k['key']
-  case key
-  when 'space'
-    clear
-  when 'backspace'
-    close
-  when 'p'
-    $paused = true
-  when 's'
-    $paused = false
-  else
-  end
-end
-
-tick = 0
-update do
-  next if $paused
-  if tick % DROP_TICKS == 0
-    # Hit bottom
-    if @pill.move_down == FCS_OCUPIED
-      @gf.commit_pill(@pill)
-      in_drop_state = @cf.perform_clear_iteration
-      # Reset
-      @pill = Pill.new(@gf)
-      @key_down_repeats = @key_repeats = 0
-      @producer.send_game_field_state && ENABLE_MULTI_PLAY_PRODUCER
-      @consumer.read_from_queue
-    end
-  end
-
-  tick += 1
-end
+require './lib/in_game_input.rb'
+require './lib/main_game_loop.rb'
 
 show

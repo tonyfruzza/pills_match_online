@@ -8,18 +8,29 @@ require './lib/connect_four.rb'
 require './lib/viruses.rb'
 require './lib/net/producer.rb'
 require './lib/net/consumer.rb'
-
-set title: 'DrRuby'
-$paused = false
-
-@gf = GameField.new
-@cf = ConnectFour.new(@gf)
-@producer = Producer.new(@gf) if ENABLE_MULTI_PLAY_PRODUCER
-@consumer = Consumer.new if ENABLE_MULTI_PLAY_CONSUMER
-@viruses = Viruses.new(@gf)
-@pill = Pill.new(@gf)
-
-require './lib/in_game_input.rb'
+require './lib/sign_in.rb'
 require './lib/main_game_loop.rb'
+
+set title: 'Dr Ruby'
+set icon: 'assets/virus_one.png'
+set resizable: true
+
+puts get :width
+
+
+si = SignIn.new
+
+on :key_down{|k| close if si.handle_input(k['key']) == EXIT_FROM_LOGIN }
+on :key_up{|k| si.handle_input_up(k['key'])}
+
+show
+clear
+
+@game_play = GamePlay.new
+require './lib/in_game_input.rb'
+update do
+  next if @game_play.paused
+  @game_play.frame
+end
 
 show

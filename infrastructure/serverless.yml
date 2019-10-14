@@ -1,0 +1,84 @@
+service: DrRuby
+provider:
+  name: aws
+  region: us-west-2
+  runtime: ruby2.5
+  memorySize: 128
+  logRetentionInDays: 30
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - cloudwatch:PutMetricData
+        - cloudwatch:ListMetrics
+        - sqs:*
+      Resource:
+        - "*"
+    - Effect: Allow
+      Action:
+        - sns:*
+      Resource:
+        - Ref: MultiplexSNS
+    - Effect: Allow
+      Action:
+        - sts:AssumeRole
+      Resource:
+        - !GetAtt [GameClientRole, Arn]
+
+functions:
+  DrRubyInfra:
+    handler: lambda/multi_play.lambda_handler
+    description: negociate a multiplayer game
+    environment:
+      SQS_NAMESPACE: ${self:service}
+      SNS_TOPIC_ARN: !Ref MultiplexSNS
+    events:
+      - http:
+          path: multiplay
+          method: post
+resources:
+  Resources:
+    MultiplexSNS:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${self:service}Multiplexer
+        TopicName: ${self:service}Multiplexer
+    GameState:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}GameState
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    GameClientRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}ClientRole
+        Description: Access to resrouces for clients to communicate
+        MaxSessionDuration: 3600 # On hour
+        Path: /
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            -
+              Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          -
+            PolicyName: ${self:service}ClientPolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                -
+                  Effect: Allow
+                  Action: sns:Publish
+                  Resource: !Ref MultiplexSNS

@@ -1,6 +1,13 @@
+# Window States
+@key_repeats = 0
+@key_rotate_repeats = 0
+@key_down_repeats = 0
+@in_drop_state = false
+@in_drop_state_count = 0
+
 # SCREEN
-CHAR_SIZE = 16
 SCREEN_COLS = 40
+CHAR_SIZE = (get :width) / SCREEN_COLS
 SCREEN_ROWS = 25
 
 MATCHES_TO_CLEAR = 4
@@ -83,10 +90,12 @@ VIRUS_TYPE = {
 
 PILL_ORIENTATION_FLAT = 0
 PILL_ORIENTATION_TALL = 1
+C64_FONT = 'assets/C64_Pro-STYLE.ttf'
+EXIT_FROM_LOGIN = 'done_here'
 
 # AWS
-ENABLE_MULTI_PLAY_PRODUCER = true
-ENABLE_MULTI_PLAY_CONSUMER = true
+ENABLE_MULTI_PLAY_PRODUCER = false
+ENABLE_MULTI_PLAY_CONSUMER = false
 AWS_REGION = 'us-west-2'
 SNS_TOPIC_ARN = 'arn:aws:sns:us-west-2:990285907597:dr_ruby'
 SQS_QUEUE_URL = 'https://sqs.us-west-2.amazonaws.com/990285907597/user1'

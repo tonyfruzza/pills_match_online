@@ -1,0 +1,15 @@
+{
+  "name": "drruby",
+  "description": "## Overview",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "serverless": "^1.30.0"
+  },
+  "main": "index.rb",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

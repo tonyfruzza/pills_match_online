@@ -5,6 +5,7 @@ provider:
   runtime: ruby2.5
   memorySize: 128
   logRetentionInDays: 30
+  variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -23,6 +24,18 @@ provider:
         - sts:AssumeRole
       Resource:
         - !GetAtt [GameClientRole, Arn]
+    - Effect: Allow
+      Action:
+        - dynamodb:BatchGetItem
+        - dynamodb:BatchWriteItem
+        - dynamodb:DeleteItem
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:UpdateItem
+      Resource:
+        - !GetAtt [GameState, Arn]
 
 functions:
   DrRubyInfra:
@@ -31,10 +44,20 @@ functions:
     environment:
       SQS_NAMESPACE: ${self:service}
       SNS_TOPIC_ARN: !Ref MultiplexSNS
+      DDB_TABLE: !Ref GameState
+      AWS_ACCOUNT_ID: !Ref AWS::AccountId
+      USER_ROLE_ARN: !GetAtt [GameClientRole, Arn]
     events:
       - http:
           path: multiplay
           method: post
+      - http:
+          path: add_new_player
+          method: post
+      - sns:
+          arn: !Ref MultiplexSNS
+          topicName: ${self:service}Multiplexer
+
 resources:
   Resources:
     MultiplexSNS:
@@ -47,20 +70,20 @@ resources:
       Properties:
         TableName: ${self:service}GameState
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: gameId
             AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: gameId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          WriteCapacityUnits: 5
     GameClientRole:
       Type: AWS::IAM::Role
       Properties:
         RoleName: ${self:service}ClientRole
         Description: Access to resrouces for clients to communicate
-        MaxSessionDuration: 3600 # On hour
+        MaxSessionDuration: 3600 # One hour
         Path: /
         AssumeRolePolicyDocument:
           Version: "2012-10-17"
@@ -68,8 +91,7 @@ resources:
             -
               Effect: Allow
               Principal:
-                Service:
-                  - lambda.amazonaws.com
+                AWS: !Sub "arn:aws:sts::${AWS::AccountId}:assumed-role/${self:service}-${self:provider.stage}-${self:provider.region}-lambdaRole/${self:service}-${self:provider.stage}-DrRubyInfra"
               Action:
                 - sts:AssumeRole
         Policies:
@@ -82,3 +104,7 @@ resources:
                   Effect: Allow
                   Action: sns:Publish
                   Resource: !Ref MultiplexSNS
+                -
+                  Effect: Allow
+                  Action: sqs:ReceiveMessage
+                  Resource: '*'

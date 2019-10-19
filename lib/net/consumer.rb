@@ -10,6 +10,7 @@ class Consumer
 
   def read_from_queue
     res = @sqs.receive_message({queue_url: @network_info.sqs_url, max_number_of_messages: 10}).to_h
+    return unless res.key?(:messages)
     res[:messages].each do |msg|
       msg_parsed = JSON.parse(
         Zlib::Inflate.inflate(

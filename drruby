@@ -16,24 +16,77 @@ set title: 'Dr Ruby'
 set icon: 'assets/virus_one.png'
 set resizable: true
 
-puts get :width
-
-
 n = Negotiator.new
 si = SignIn.new(n)
+@signed_in = false
 
-on :key_down{|k| close if n.player_name = si.handle_input(k['key'])}
-on :key_up{|k| si.handle_input_up(k['key'])}
+on :key_up do |k|
+  unless @signed_in
+    si.handle_input_up(k['key'])
+  else
+    key = k['key']
+    case key
+    when 'left'
+      @key_repeats = 0
+    when 'right'
+      @key_repeats = 0
+    when 'down'
+      @key_down_repeats = 0
+    when 'up'
+      @key_rotate_repeats = 0
+    end
+  end
+end
 
-show
-clear
+on :key_down do |k|
+  unless @signed_in
+    if n.player_name = si.handle_input(k['key'])
+      @signed_in = true
+      clear
+      n.handoff_user_info
+      @game_play = GamePlay.new(n)
+      require './lib/in_game_input.rb'
+      update do
+        next if @game_play.paused
+        @game_play.frame
+      end
+    end
+  else
+    key = k['key']
+    case key
+    when 'backspace'
+      exit
+      close
+    when 'p'
+      @game_play.paused = true
+    when 's'
+      @game_play.paused = false
+    end
+  end
+end
 
-n.handoff_user_info
-@game_play = GamePlay.new(n)
-require './lib/in_game_input.rb'
-update do
-  next if @game_play.paused
-  @game_play.frame
+on :key_held do |k|
+  if @signed_in
+    key = k['key']
+    case key
+    when 'left'
+      @game_play.pill.move_left if @key_repeats == 0
+      @key_repeats += 1
+      @key_repeats = 0 if @key_repeats == KEY_TIME_REPEAT
+    when 'right'
+      @game_play.pill.move_right if @key_repeats == 0
+      @key_repeats += 1
+      @key_repeats = 0 if @key_repeats == KEY_TIME_REPEAT
+    when 'up'
+      @game_play.pill.rotate if @key_rotate_repeats == 0
+      @key_rotate_repeats += 1
+      @key_rotate_repeats = 0 if @key_rotate_repeats == KEY_TIME_REPEAT
+    when 'down'
+      @game_play.pill.move_down if @key_down_repeats == 0
+      @key_down_repeats += 1
+      @key_down_repeats = 0 if @key_down_repeats == KEY_TIME_REPEAT_FOR_DOWN
+    end
+  end
 end
 
 show

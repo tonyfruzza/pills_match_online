@@ -18,7 +18,10 @@ class GamePlay < Window
       # Hit bottom
       if @pill.move_down == FCS_OCUPIED
         @gf.commit_pill(@pill)
-        in_drop_state = @cf.perform_clear_iteration
+        total_clears = @cf.perform_clear_iteration
+        if total_clears > 0
+          puts "Cleared: #{total_clears}"
+        end
         # Reset
         @pill = Pill.new(@gf, @network_info.rand)
         @key_down_repeats = @key_repeats = 0

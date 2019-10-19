@@ -101,9 +101,11 @@ class ConnectFour
   end
 
   def perform_clears
+    clears = 0
     BOTTLE_WIDTH.times do |x|
       BOTTLE_HEIGHT.times do |y|
         if @gfm[x][y][:to_clear]
+          clears += 1
           # Convert the other pill half to a pill half
           case @gfm[x][y][:state]
           when FCS_PILL_LEFT
@@ -190,6 +192,7 @@ class ConnectFour
         end
       end
     end
+    clears
   end
 
   def do_drops
@@ -252,15 +255,17 @@ class ConnectFour
   end
 
   def perform_clear_iteration
+    total_clears = 0
     loop do
       break unless flag_verticals_for_clear || flag_horizontal_for_clear
-      perform_clears
+      total_clears += perform_clears
       loop do
         did_a_drop = do_drops # Do this until there are no more
         in_drop_state = true if did_a_drop
         break unless did_a_drop
       end
     end
+    total_clears
   end
 
 end

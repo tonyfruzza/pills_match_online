@@ -90,7 +90,7 @@ VIRUS_TYPE = {
 
 PILL_ORIENTATION_FLAT = 0
 PILL_ORIENTATION_TALL = 1
-C64_FONT = 'assets/C64_Pro-STYLE.ttf'
+C64_FONT = 'assets/fonts/C64_Pro-STYLE.ttf'
 EXIT_FROM_LOGIN = 'done_here'
 
 # AWS

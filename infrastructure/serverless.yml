@@ -44,7 +44,6 @@ provider:
     SNS_TOPIC_ARN: !Ref MultiplexSNS
     DDB_TABLE: !Ref GameState
     AWS_ACCOUNT_ID: !Ref AWS::AccountId
-    USER_ROLE_ARN: !GetAtt [GameClientRole, Arn]
 
 functions:
   DrRubyInfra:
@@ -62,10 +61,17 @@ functions:
   keep_alive:
     handler: keep_alive/ping.lambda_handler
     description: who is active
+    logRetentionInDays: 1
     events:
       - sns:
           arn: !Ref MultiplexSNS
           topicName: ${self:service}Multiplexer
+  the_reaper:
+    handler: reaper/cleanup.lambda_handler
+    description: remove old game resources
+    logRetentionInDays: 1
+    events:
+      - schedule: rate(1 minute)
 resources:
   Resources:
     MultiplexSNS:

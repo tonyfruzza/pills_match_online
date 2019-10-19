@@ -18,21 +18,26 @@ class MultiplexManager
   def start_new_game
     # @game_id = SecureRandom.uuid.split('-').first
     @game_id = 'notsorandom'
+    @game_seed = rand(0..9999)
     puts "Starting new game #{@game_id}"
     parms = {
       table_name: ENV['DDB_TABLE'],
       key: {gameId: @game_id},
       attribute_updates: {
-        LastActivity: {
+        last_activity: {
           value: Time.now.to_i,
           action: 'PUT'
         },
         game_seed: {
-          value: rand(1..3000),
+          value: @game_seed,
+          action: 'PUT'
+        },
+        started: {
+          value: false,
           action: 'PUT'
         },
         gamers: {
-          value: 1,
+          value: [],
           action: 'PUT'
         }
       }
@@ -40,16 +45,39 @@ class MultiplexManager
     @ddb.update_item(parms)
   end
 
+  def is_there_an_active_game?
+    active_game = @ddb.scan({table_name: ENV['DDB_TABLE']}).to_h[:items].find do |game|
+      game['last_activity'].to_f > (Time.new.to_i - 10)
+    end
+    if active_game
+      @game_seed = active_game['game_seed'].to_f.to_i
+      @game_id = active_game['gameId']
+      return true
+    end
+    return false
+  end
+
   def add_new_player(player_name)
     return throw_error('invalid username') if player_name.empty?
     user_id = SecureRandom.uuid.split('-').first
     puts "Creating resources for player: #{player_name} AKA #{user_id}"
 
-    start_new_game unless get_active_games
+    start_new_game unless is_there_an_active_game?
     sub_queue(user_id)
     creds = get_player_permissions(user_id)
     sqs_url = create_queue(user_id)
     add_perms_to_queue(sqs_url, user_id, creds[:assumed_role_user][:arn])
+
+    @ddb.update_item({
+      table_name: ENV['DDB_TABLE'],
+      key: {gameId: @game_id},
+      update_expression: 'SET gamers = list_append(gamers, :i)',
+      expression_attribute_values: {
+        ':i': [player_name]
+      }
+    })
+
+    # Return structure
     {
       type: MSG_CONNECTION_INFO,
       user_id: user_id,
@@ -59,7 +87,7 @@ class MultiplexManager
       session_token: creds[:credentials][:session_token],
       sns_topic_arn: ENV['SNS_TOPIC_ARN'],
       sqs_url: sqs_url,
-      game_seed: rand(0..9999)
+      game_seed: @game_seed
     }
   end
 
@@ -77,18 +105,13 @@ class MultiplexManager
       table_name: ENV['DDB_TABLE'],
       key: {gameId: game_id},
       attribute_updates: {
-        LastActivity: {
+        last_activity: {
           value: Time.now.to_i,
           action: 'PUT'
         }
       }
     }
     @ddb.update_item(parms)
-  end
-
-  def get_active_games
-    puts @ddb.scan({table_name: ENV['DDB_TABLE']})
-    return false
   end
 
   #

@@ -53,7 +53,7 @@ class Random
         end
         @state[0] = 0x80000000
       else
-        raise ArgumentError, "Seed must be an Integer or an Array"
+        raise ArgumentError, "Seed must be an Integer or an Array instead we recieved #{seed}"
       end
     end
     # Returns a random Integer from the range 0 ... (1 << 32)

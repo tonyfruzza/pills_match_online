@@ -33,8 +33,7 @@ class Negotiator
 
     case r['type']
     when MSG_CONNECTION_INFO
-      puts "Received new game response"
-      access_key_id, secret_access_key, session_token = nil
+      puts "Received new game response for game seed #{r['game_seed']}"
       @aws_credentials = Aws::Credentials.new(
         r['access_key_id'],
         r['secret_access_key'],

@@ -45,7 +45,6 @@ on :key_down do |k|
       clear
       n.handoff_user_info
       @game_play = GamePlay.new(n)
-      require './lib/in_game_input.rb'
       update do
         next if @game_play.paused
         @game_play.frame

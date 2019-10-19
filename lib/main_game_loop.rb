@@ -9,8 +9,8 @@ class GamePlay < Window
     @cf = ConnectFour.new(@gf)
     @producer = Producer.new(@gf, @network_info) if ENABLE_MULTI_PLAY_PRODUCER
     @consumer = Consumer.new(@network_info) if ENABLE_MULTI_PLAY_CONSUMER
-    @viruses = Viruses.new(@gf, @network_info.rand)
-    @pill = Pill.new(@gf, @network_info.rand)
+    @viruses = Viruses.new(@gf)
+    @pill = Pill.new(@gf)
   end
 
   def frame
@@ -23,7 +23,7 @@ class GamePlay < Window
           puts "Cleared: #{total_clears}"
         end
         # Reset
-        @pill = Pill.new(@gf, @network_info.rand)
+        @pill = Pill.new(@gf)
         @key_down_repeats = @key_repeats = 0
         @producer.send_game_field_state if ENABLE_MULTI_PLAY_PRODUCER
         @consumer.read_from_queue if ENABLE_MULTI_PLAY_CONSUMER

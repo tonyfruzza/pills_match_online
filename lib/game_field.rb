@@ -29,12 +29,12 @@ class GameField
   end
 
   def commit_pill(pill)
-    left_commit = screen_loc_2_game_field_cell(pill.left.x, pill.left.y)
-    right_commit = screen_loc_2_game_field_cell(pill.right.x, pill.right.y)
+    left_commit = screen_loc_2_game_field_cell(pill.pill_left.x, pill.pill_left.y)
+    right_commit = screen_loc_2_game_field_cell(pill.pill_right.x, pill.pill_right.y)
 
-    left_commit[:img] = pill.left
+    left_commit[:img] = pill.pill_left
     left_commit[:state] = pill.rotate_state == PILL_ORIENTATION_FLAT ? FCS_PILL_LEFT : FCS_PILL_BOTTOM
-    right_commit[:img] = pill.right
+    right_commit[:img] = pill.pill_right
     right_commit[:state] = pill.rotate_state == PILL_ORIENTATION_FLAT ? FCS_PILL_RIGHT : FCS_PILL_TOP
   end
 

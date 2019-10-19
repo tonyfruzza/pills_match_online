@@ -39,16 +39,18 @@ provider:
         - dynamodb:UpdateItem
       Resource:
         - !GetAtt [GameState, Arn]
+  environment:
+    SQS_NAMESPACE: ${self:service}
+    SNS_TOPIC_ARN: !Ref MultiplexSNS
+    DDB_TABLE: !Ref GameState
+    AWS_ACCOUNT_ID: !Ref AWS::AccountId
+    USER_ROLE_ARN: !GetAtt [GameClientRole, Arn]
 
 functions:
   DrRubyInfra:
-    handler: lambda/multi_play.lambda_handler
+    handler: new_game/multi_play.lambda_handler
     description: negociate a multiplayer game
     environment:
-      SQS_NAMESPACE: ${self:service}
-      SNS_TOPIC_ARN: !Ref MultiplexSNS
-      DDB_TABLE: !Ref GameState
-      AWS_ACCOUNT_ID: !Ref AWS::AccountId
       USER_ROLE_ARN: !GetAtt [GameClientRole, Arn]
     events:
       - http:
@@ -57,10 +59,13 @@ functions:
       - http:
           path: add_new_player
           method: post
+  keep_alive:
+    handler: keep_alive/ping.lambda_handler
+    description: who is active
+    events:
       - sns:
           arn: !Ref MultiplexSNS
           topicName: ${self:service}Multiplexer
-
 resources:
   Resources:
     MultiplexSNS:

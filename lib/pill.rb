@@ -1,11 +1,15 @@
 class Pill
-  def initialize(game_field_object, prng)
+  attr_reader :pill_left, :pill_right, :rotate_state
+  def initialize(game_field_object)
     @gf = game_field_object
     @pill_left  = Image.new PILL_IMG_LEFT
     @pill_right = Image.new PILL_IMG_RIGHT
 
     # Try twice if dual colors
-    c1, c2 = PILL_COLORS[prng.random_32_bits%3], PILL_COLORS[prng.random_32_bits%3]
+    c1, c2 = PILL_COLORS[rand(0...3)], PILL_COLORS[rand(0...3)]
+    if c1 == c2
+      c1, c2 = PILL_COLORS[rand(0...3)], PILL_COLORS[rand(0...3)]
+    end
     @pill_left.color, @pill_right.color = c1, c2
 
     @pill_left.height = @pill_left.width = @pill_right.height = @pill_right.width = CHAR_SIZE
@@ -13,18 +17,6 @@ class Pill
     @pill_left.x = CHAR_SIZE * (SCREEN_COLS/2-1)
     @pill_right.x = CHAR_SIZE + CHAR_SIZE * (SCREEN_COLS/2-1)
     @rotate_state = 0
-  end
-
-  def left
-    @pill_left
-  end
-
-  def right
-    @pill_right
-  end
-
-  def rotate_state
-    @rotate_state
   end
 
   def move_right(dry_run = false)

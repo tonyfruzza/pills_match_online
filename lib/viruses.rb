@@ -1,9 +1,8 @@
 class Viruses
-  TOP_VIRUS_BUFFER = 6
-  def initialize(gf, prng)
+  TOP_VIRUS_BUFFER = 8
+  def initialize(gf)
     @gf = gf
     viruses = 20
-    @prng = prng
     seed_viruses(FCS_PILL_VIRUS_ONE, :FCS_PILL_VIRUS_ONE, viruses)
     seed_viruses(FCS_PILL_VIRUS_TWO, :FCS_PILL_VIRUS_TWO, viruses)
     seed_viruses(FCS_PILL_VIRUS_THREE, :FCS_PILL_VIRUS_THREE, viruses)
@@ -12,8 +11,9 @@ class Viruses
   def seed_viruses(cell_char_type, virus_type, count)
     viruses_planted = 0
     loop do |v|
-      x = ((@prng.random_32_bits%BOTTLE_WIDTH)+BOTTLE_X_OFFSET)*CHAR_SIZE
-      y = ((@prng.random_32_bits%(BOTTLE_HEIGHT-TOP_VIRUS_BUFFER))+TOP_VIRUS_BUFFER+BOTTLE_Y_OFFSET)*CHAR_SIZE
+      x = (rand(0...BOTTLE_WIDTH)+BOTTLE_X_OFFSET)*CHAR_SIZE
+      y = (rand(0...(BOTTLE_HEIGHT-TOP_VIRUS_BUFFER))+TOP_VIRUS_BUFFER+BOTTLE_Y_OFFSET)*CHAR_SIZE
+
 
       cell_to_v = @gf.screen_loc_2_game_field_cell(x, y)
       if(cell_to_v[:state] == FCS_OUT_OF_RANGE)

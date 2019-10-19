@@ -4,11 +4,10 @@ require 'uri'
 require 'zlib'
 require 'base64'
 require './lib/net/net_defs.rb'
-require './lib/random.rb'
 
 class Negotiator
   attr_accessor :player_name
-  attr_reader :game_id, :user_id, :aws_credentials, :sqs_url, :sns_topic_arn, :rand
+  attr_reader :game_id, :user_id, :aws_credentials, :sqs_url, :sns_topic_arn
 
   def initialize
   end
@@ -43,7 +42,7 @@ class Negotiator
       @sqs_url = r['sqs_url']
       @user_id = r['user_id']
       @game_id = r['game_id']
-      @rand = Random::MT19937.new(r['game_seed'])
+      srand(r['game_seed'])
     end
   end
 end

@@ -3,33 +3,37 @@ require 'zlib'
 require 'base64'
 
 class Consumer
-  def initialize
-    @sqs = Aws::SQS::Client.new(region: AWS_REGION)
-    begin
-      # puts "Is queue empty? We donno"
-      # @sqs.purge_queue({queue_url: SQS_QUEUE_URL})
-    rescue
-      puts "Already has been purged within last 60 seconds"
-    end
+  def initialize(network_info)
+    @network_info = network_info
+    @sqs = Aws::SQS::Client.new(region: AWS_REGION, credentials: @network_info.aws_credentials)
   end
 
   def read_from_queue
-    res = @sqs.receive_message({queue_url: SQS_QUEUE_URL, max_number_of_messages: 10}).to_h
+    res = @sqs.receive_message({queue_url: @network_info.sqs_url, max_number_of_messages: 10}).to_h
     res[:messages].each do |msg|
-      ghost_data = JSON.parse(
+      msg_parsed = JSON.parse(
         Zlib::Inflate.inflate(
           Base64.decode64(
             msg[:body]
           )
         )
       )
-      update_ghost(ghost_data)
+      codec(msg_parsed)
       delete_item(msg[:receipt_handle])
     end
   end
 
+  def codec(msg)
+    # Perform some sanity checks
+    case msg['type']
+    when MSG_TYPE_FIELD_UPDATE
+      update_ghost(msg['cells_with_content']) unless msg['user_id'] == @network_info.user_id
+    end
+
+  end
+
   def delete_item(receipt_handle)
-    @sqs.delete_message({queue_url: SQS_QUEUE_URL, receipt_handle: receipt_handle})
+    @sqs.delete_message({queue_url: @network_info.sqs_url, receipt_handle: receipt_handle})
   end
 
   def update_ghost(ghost_data)

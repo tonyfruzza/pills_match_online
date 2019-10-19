@@ -10,6 +10,7 @@ require './lib/net/producer.rb'
 require './lib/net/consumer.rb'
 require './lib/sign_in.rb'
 require './lib/main_game_loop.rb'
+require './lib/net/negotiator.rb'
 
 set title: 'Dr Ruby'
 set icon: 'assets/virus_one.png'
@@ -18,15 +19,17 @@ set resizable: true
 puts get :width
 
 
-si = SignIn.new
+n = Negotiator.new
+si = SignIn.new(n)
 
-on :key_down{|k| close if si.handle_input(k['key']) == EXIT_FROM_LOGIN }
+on :key_down{|k| close if n.player_name = si.handle_input(k['key'])}
 on :key_up{|k| si.handle_input_up(k['key'])}
 
 show
 clear
 
-@game_play = GamePlay.new
+n.handoff_user_info
+@game_play = GamePlay.new(n)
 require './lib/in_game_input.rb'
 update do
   next if @game_play.paused

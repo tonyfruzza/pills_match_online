@@ -4,13 +4,16 @@ provider:
   region: us-west-2
   runtime: ruby2.5
   memorySize: 128
-  logRetentionInDays: 30
+  logRetentionInDays: 7
   variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
   iamRoleStatements:
     - Effect: Allow
       Action:
         - cloudwatch:PutMetricData
         - cloudwatch:ListMetrics
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
         - sqs:*
       Resource:
         - "*"
@@ -63,12 +66,12 @@ resources:
     MultiplexSNS:
       Type: AWS::SNS::Topic
       Properties:
-        DisplayName: ${self:service}Multiplexer
-        TopicName: ${self:service}Multiplexer
+        DisplayName: ${self:service}-${self:provider.stage}-Multiplexer
+        TopicName: ${self:service}-${self:provider.stage}-Multiplexer
     GameState:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:service}GameState
+        TableName: ${self:service}-${self:provider.stage}-GameState
         AttributeDefinitions:
           - AttributeName: gameId
             AttributeType: S
@@ -77,7 +80,7 @@ resources:
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
-          WriteCapacityUnits: 5
+          WriteCapacityUnits: 1
     GameClientRole:
       Type: AWS::IAM::Role
       Properties:
@@ -106,5 +109,7 @@ resources:
                   Resource: !Ref MultiplexSNS
                 -
                   Effect: Allow
-                  Action: sqs:ReceiveMessage
-                  Resource: '*'
+                  Action:
+                    - sqs:ReceiveMessage
+                    - sqs:DeleteMessage
+                  Resource: !Sub "arn:aws:sqs:${self:provider.region}:${AWS::AccountId}:${self:service}_*"

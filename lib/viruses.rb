@@ -1,15 +1,20 @@
 class Viruses
-  def initialize(gf)
+  TOP_VIRUS_BUFFER = 9
+  def initialize(gf, prng)
     @gf = gf
     viruses = 12
-    seed_virsus(FCS_PILL_VIRUS_ONE, :FCS_PILL_VIRUS_ONE, viruses)
-    seed_virsus(FCS_PILL_VIRUS_TWO, :FCS_PILL_VIRUS_TWO, viruses)
-    seed_virsus(FCS_PILL_VIRUS_THREE, :FCS_PILL_VIRUS_THREE, viruses)
+    @prng = prng
+    seed_viruses(FCS_PILL_VIRUS_ONE, :FCS_PILL_VIRUS_ONE, viruses)
+    seed_viruses(FCS_PILL_VIRUS_TWO, :FCS_PILL_VIRUS_TWO, viruses)
+    seed_viruses(FCS_PILL_VIRUS_THREE, :FCS_PILL_VIRUS_THREE, viruses)
   end
 
-  def seed_virsus(cell_char_type, virus_type, count)
+  def seed_viruses(cell_char_type, virus_type, count)
     count.times do |v|
-      x, y = (rand(0..(BOTTLE_WIDTH-1))+BOTTLE_X_OFFSET)*CHAR_SIZE, (rand(9..BOTTLE_HEIGHT)+BOTTLE_Y_OFFSET)*CHAR_SIZE
+      # x, y = (rand(0..(BOTTLE_WIDTH-1))+BOTTLE_X_OFFSET)*CHAR_SIZE, (rand(9..BOTTLE_HEIGHT)+BOTTLE_Y_OFFSET)*CHAR_SIZE
+      x = (@prng.random_32_bits%(BOTTLE_WIDTH-1)+BOTTLE_X_OFFSET)*CHAR_SIZE
+      # y = (rand(9..BOTTLE_HEIGHT)+BOTTLE_Y_OFFSET)*CHAR_SIZE
+      y = (@prng.random_32_bits%BOTTLE_HEIGHT+TOP_VIRUS_BUFFER+BOTTLE_Y_OFFSET)*CHAR_SIZE
 
       cell_to_v = @gf.screen_loc_2_game_field_cell(x, y)
       if(cell_to_v[:state] == FCS_OUT_OF_RANGE)

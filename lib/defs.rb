@@ -94,9 +94,12 @@ C64_FONT = 'assets/C64_Pro-STYLE.ttf'
 EXIT_FROM_LOGIN = 'done_here'
 
 # AWS
-ENABLE_MULTI_PLAY_PRODUCER = false
-ENABLE_MULTI_PLAY_CONSUMER = false
+ENABLE_MULTI_PLAY_PRODUCER = true
+ENABLE_MULTI_PLAY_CONSUMER = true
 AWS_REGION = 'us-west-2'
-SNS_TOPIC_ARN = 'arn:aws:sns:us-west-2:990285907597:dr_ruby'
-SQS_QUEUE_URL = 'https://sqs.us-west-2.amazonaws.com/990285907597/user1'
 TICKS_TO_SEND_SCREEN_STATE = 60
+BASE_API_URL = 'https://xmfb0egn52.execute-api.us-west-2.amazonaws.com/dev/'
+
+# Protocol
+MSG_TYPE_GAME_STATE = 0
+MSG_TYPE_FIELD_UPDATE = 1

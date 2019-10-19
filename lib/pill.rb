@@ -1,12 +1,11 @@
 class Pill
-  def initialize(game_field_object)
+  def initialize(game_field_object, prng)
     @gf = game_field_object
     @pill_left  = Image.new PILL_IMG_LEFT
     @pill_right = Image.new PILL_IMG_RIGHT
 
     # Try twice if dual colors
-    c1, c2 = PILL_COLORS.sample, PILL_COLORS.sample
-    c1, c2 = PILL_COLORS.sample, PILL_COLORS.sample if c1 == c2
+    c1, c2 = PILL_COLORS[prng.random_32_bits%3], PILL_COLORS[prng.random_32_bits%3]
     @pill_left.color, @pill_right.color = c1, c2
 
     @pill_left.height = @pill_left.width = @pill_right.height = @pill_right.width = CHAR_SIZE
